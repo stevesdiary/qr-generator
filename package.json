@@ -1,0 +1,28 @@
+{
+  "name": "qr-encode-decode",
+  "version": "1.0.0",
+  "description": "Ticket generation and confirmation service for events",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc && node dist/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stevesdiary/qr-encode-decode.git"
+  },
+  "keywords": [
+    "qr",
+    "code",
+    "event",
+    "ticket"
+  ],
+  "author": "Stephen Oyeyemi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stevesdiary/qr-encode-decode/issues"
+  },
+  "homepage": "https://github.com/stevesdiary/qr-encode-decode#readme",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}
