@@ -59,7 +59,7 @@ app.post('/decode-qrcode', upload.single('qrCodeImage'), async (req, res) => {
     if (!code) {
       return res.status(400).json({ message: 'No QR code detected' });
     }
-		console.log(code.data)
+		// console.log(JSON.stringify(code.data))
     return res.status(200).json({ message: 'QR code decoded successfully', data: code.data});
     
   } catch (err) {
