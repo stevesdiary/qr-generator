@@ -24,23 +24,26 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/eventdb',
 .catch(err => console.log('Failed to connect to MongoDB', err));
 
 app.post('/generate-qrcode', async (req, res) => {
-    const { date, time, venue, ticketNumber } = req.body;
-    if (!date || !time || !venue || !ticketNumber) {
-        return res.status(400).json({ message: 'Missing event details' });
-    }
+  const { date, time, venue, ticketNumber } = req.body;
+  if (!date || !time || !venue || !ticketNumber) {
+    return res.status(400).json({ message: 'Missing some important event details' });
+  }
+  // const data = date, time, venue, ticketNumber
+  try {
+    const event = new Event({ date, time, venue, ticketNumber });
+    await event.save();
+    
+    const eventData = await encrypt(JSON.stringify({ date, time, venue, ticketNumber }));
 
-    try {
-			const event = new Event({ date, time, venue, ticketNumber });
-			await event.save();
-			
-			const eventData = (JSON.stringify({ date, time, venue, ticketNumber }));
-		
-			const qrCodeUrl = await QRCode.toDataURL(eventData);
-			res.status(200).json({ qrCode: qrCodeUrl });
-    } catch (err) {
-			console.log("Error ocurred", err);
-			res.status(500).json({ message: 'QR code generation failed', error: err.message });
-    }
+    if(eventData)
+      console.log("Data has been encrypted")
+    const qrCodeUrl = await QRCode.toDataURL(eventData);
+    
+    res.status(200).json({ qrCode: qrCodeUrl });
+  } catch (err) {
+    console.log("Error ocurred", err);
+    res.status(500).json({ message: 'QR code generation failed', error: err.message });
+  }
 });
 
 app.post('/decode-qrcode', upload.single('qrCodeImage'), async (req, res) => {
@@ -55,9 +58,12 @@ app.post('/decode-qrcode', upload.single('qrCodeImage'), async (req, res) => {
       .toBuffer({ resolveWithObject: true });
 
 			const code = jsqr(new Uint8ClampedArray(data), info.width, info.height);
-
+      const decryptedData = await decrypt(code)
     if (!code) {
       return res.status(400).json({ message: 'No QR code detected' });
+    }
+    if (decryptedData) {
+      console.log("Data has been encrypted")
     }
 		// console.log(JSON.stringify(code.data))
     return res.status(200).json({ message: 'QR code decoded successfully', data: code.data});
@@ -69,5 +75,5 @@ app.post('/decode-qrcode', upload.single('qrCodeImage'), async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server running on http://localhost:${port}`);
 });
