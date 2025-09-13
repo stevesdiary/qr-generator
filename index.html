@@ -114,6 +114,24 @@
             border-radius: 15px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
+        #qrcode canvas {
+            border: 8px solid white;
+            border-radius: 8px;
+            width: 200px;
+            height: 200px;
+        }
+        .preview-section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            border: 2px dashed #6a11cb;
+        }
+        .preview-section h3 {
+            margin: 0 0 15px 0;
+            color: #6a11cb;
+            font-size: 1.2rem;
+        }
         .download-btn {
             background-color: #28a745;
             color: white;
@@ -170,7 +188,10 @@
         <button class="generate-btn" id="generate-btn">Generate QR Code</button>
         
         <div class="result-container hidden" id="result-container">
-            <div id="qrcode"></div>
+            <div class="preview-section">
+                <h3>Preview</h3>
+                <div id="qrcode"></div>
+            </div>
             <button class="download-btn" id="download-btn">Download QR Code</button>
         </div>
     </div>
@@ -224,8 +245,8 @@
                 // Generate QR code
                 qrcode = new QRCode(document.getElementById('qrcode'), {
                     text: url,
-                    width: 256,
-                    height: 256,
+                    width: 2048,
+                    height: 2048,
                     colorDark: '#000000',
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.H
@@ -251,15 +272,24 @@
                 const img = new Image();
                 
                 img.onload = function() {
-                    // Calculate logo size (about 1/5 of QR code)
                     const logoSize = canvas.width / 5;
                     const x = (canvas.width - logoSize) / 2;
                     const y = (canvas.height - logoSize) / 2;
+                    const radius = logoSize / 2;
                     
-                    // Draw logo with white background
+                    // Draw circular white background
                     ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(x - 5, y - 5, logoSize + 10, logoSize + 10);
+                    ctx.beginPath();
+                    ctx.arc(x + radius, y + radius, radius + 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Clip to circle and draw logo
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(x + radius, y + radius, radius, 0, 2 * Math.PI);
+                    ctx.clip();
                     ctx.drawImage(img, x, y, logoSize, logoSize);
+                    ctx.restore();
                 };
                 
                 img.src = logoData;
@@ -270,9 +300,20 @@
                 const canvas = document.querySelector('#qrcode canvas');
                 if (!canvas) return;
                 
+                // Create new canvas with white border
+                const downloadCanvas = document.createElement('canvas');
+                const borderSize = 20;
+                downloadCanvas.width = canvas.width + (borderSize * 2);
+                downloadCanvas.height = canvas.height + (borderSize * 2);
+                
+                const ctx = downloadCanvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, downloadCanvas.width, downloadCanvas.height);
+                ctx.drawImage(canvas, borderSize, borderSize);
+                
                 const link = document.createElement('a');
                 link.download = 'custom-qrcode.png';
-                link.href = canvas.toDataURL('image/png');
+                link.href = downloadCanvas.toDataURL('image/png');
                 link.click();
             });
         });
