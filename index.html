@@ -185,12 +185,21 @@
             </div>
         </div>
         
+        <div class="input-group">
+            <label for="quality">Quality:</label>
+            <select id="quality" style="width: 100%; padding: 15px; border: 2px solid #e1e1e1; border-radius: 10px; font-size: 16px;">
+                <option value="512">Standard (512px)</option>
+                <option value="1024">High (1024px)</option>
+                <option value="2048" selected>Ultra (2048px)</option>
+                <option value="4096">4K (4096px)</option>
+            </select>
+        </div>
+        
         <button class="generate-btn" id="generate-btn">Generate QR Code</button>
         
         <div class="result-container hidden" id="result-container">
             <div class="preview-section">
-                <h3>Preview</h3>
-                <div id="qrcode"></div>
+                <h3>✅ Your QR code is ready for download</h3>
             </div>
             <button class="download-btn" id="download-btn">Download QR Code</button>
         </div>
@@ -240,32 +249,42 @@
                 }
 
                 // Clear previous QR code
-                document.getElementById('qrcode').innerHTML = '';
+                const existingHidden = document.querySelector('.qr-hidden');
+                if (existingHidden) existingHidden.remove();
                 
-                // Generate QR code
-                qrcode = new QRCode(document.getElementById('qrcode'), {
+                const quality = parseInt(document.getElementById('quality').value);
+                
+                // Generate QR code (hidden)
+                const hiddenDiv = document.createElement('div');
+                hiddenDiv.className = 'qr-hidden';
+                hiddenDiv.style.display = 'none';
+                document.body.appendChild(hiddenDiv);
+                
+                qrcode = new QRCode(hiddenDiv, {
                     text: url,
-                    width: 2048,
-                    height: 2048,
+                    width: quality,
+                    height: quality,
                     colorDark: '#000000',
                     colorLight: '#ffffff',
                     correctLevel: QRCode.CorrectLevel.H
                 });
 
-                // Show result container
-                resultContainer.classList.remove('hidden');
-                
-                // Add logo if provided
-                if (logoData) {
-                    setTimeout(() => {
-                        addLogoToQR();
-                    }, 300);
-                }
+                // Show result container after QR generation
+                setTimeout(() => {
+                    resultContainer.classList.remove('hidden');
+                    
+                    // Add logo if provided
+                    if (logoData) {
+                        setTimeout(() => {
+                            addLogoToQR();
+                        }, 100);
+                    }
+                }, 100);
             });
 
             // Add logo to QR code
             function addLogoToQR() {
-                const canvas = document.querySelector('#qrcode canvas');
+                const canvas = document.querySelector('.qr-hidden canvas');
                 if (!canvas) return;
                 
                 const ctx = canvas.getContext('2d');
@@ -297,12 +316,12 @@
 
             // Download QR Code
             downloadBtn.addEventListener('click', function() {
-                const canvas = document.querySelector('#qrcode canvas');
+                const canvas = document.querySelector('.qr-hidden canvas');
                 if (!canvas) return;
                 
                 // Create new canvas with white border
                 const downloadCanvas = document.createElement('canvas');
-                const borderSize = 20;
+                const borderSize = Math.max(20, canvas.width * 0.02);
                 downloadCanvas.width = canvas.width + (borderSize * 2);
                 downloadCanvas.height = canvas.height + (borderSize * 2);
                 
