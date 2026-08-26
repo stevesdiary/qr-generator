@@ -20,6 +20,4 @@ A simple, elegant QR code generator with custom logo support.
 ## How to Run
 
 Simply open the `index.html` file in any modern web browser. No installation or build process required.
-
-
-https://drive.google.com/file/d/15Z_q2IwPHGmZUofBThoSp8AWVEfRhzON/view?usp=drivesdk
+I deployed it here for  free use https://qr-code-ey4t.onrender.com/
